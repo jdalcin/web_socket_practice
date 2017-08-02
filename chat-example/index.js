@@ -1,5 +1,5 @@
-var app = require('express')();
-var http = require('http').Server(app);
+const app = require('express')();
+const http = require('http').Server(app);
 var io = require('socket.io')(http);
 var createCanvas = require('canvas');
 
@@ -38,7 +38,9 @@ io.on('connection', function(socket){
   	console.log("Click reached server.")
   	drawCircle();
   	number++;
-  	io.emit('clientClick', {URL: canvas.toDataURL(), numShapes: number});
+  	var x = Math.random() * data.screenWidth;
+          	var y = Math.random() * data.screenHeight;
+  	io.emit('clientClick', {URL: canvas.toDataURL(), numShapes: number, x: x, y: y});
   	console.log("Server sent click data.");
   	console.log("Number of images is: " + number);
   })

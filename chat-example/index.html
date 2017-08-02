@@ -19,9 +19,13 @@
     <script>
       $(function () {
         var socket = io();
+        var myShapeNum = 0;
+        var screenWidth = $(document).width();
+        var screenHeight = $(document).height();
+
         $(document).on('click', function(event) {
           console.log("Client click recognized.");
-          socket.emit('clientClick', "Hello!");
+          socket.emit('clientClick', {screenWidth: screenWidth, screenHeight: screenHeight});
         });
         // $('form').submit(function(){
         //   socket.emit('chat message', $('#m').val());
@@ -33,16 +37,22 @@
         // });
         socket.on('clientClick', function(data) {
           console.log("Received click data from server.");
+          myShapeNum = data.numShapes;
           $('#box').append($('<img id = "circle_' + data.numShapes + '" src = " ' + data.URL + ' "/>'));
-          var x = Math.random() * $(document).width();
-          var y = Math.random() * $(document).height();
-          console.log("x: " + x + ", y: " + y);
           $('#circle_' + data.numShapes).css({
               'position': 'absolute',
-              'left': x + 'px',
-              'top': y + 'px'
-            });
+              'left': data.x + 'px',
+              'top': data.y + 'px'
+          });
         });
+
+      $('#circle_' + data.numShapes).on('mousedown', function(event) {
+        console.log("Mouse down recognized.");
+      });
+      $(document).on('mouseup', function(event){
+        console.log("Mouse is up");
+      });
+
       });
     </script>
   </body>
