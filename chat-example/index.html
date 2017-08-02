@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body id="box">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      $(function () {
+        var socket = io();
+        $(document).on('click', function(event) {
+          console.log("Client click recognized.");
+          socket.emit('clientClick', "Hello!");
+        });
+        // $('form').submit(function(){
+        //   socket.emit('chat message', $('#m').val());
+        //   $('#m').val('');
+        //   return false;
+        // });
+        // socket.on('chat message', function(msg){
+        //   $('#messages').append($('<li>').text(msg));
+        // });
+        socket.on('clientClick', function(data) {
+          console.log("Received click data from server.");
+          $('#box').append($('<img id = "circle_' + data.numShapes + '" src = " ' + data.URL + ' "/>'));
+          var x = Math.random() * $(document).width();
+          var y = Math.random() * $(document).height();
+          console.log("x: " + x + ", y: " + y);
+          $('#circle_' + data.numShapes).css({
+              'position': 'absolute',
+              'left': x + 'px',
+              'top': y + 'px'
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
