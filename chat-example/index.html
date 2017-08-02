@@ -42,10 +42,6 @@
         var fireRate = 50; // ms
         var fireInterval = null;
 
-        // $(document).on('click', function(event) {
-        //   console.log("Client click recognized.");
-        //   socket.emit('clientClick', {screenWidth: screenWidth, screenHeight: screenHeight});
-        // })
         $(document).on('mousedown', function(event) {
           console.log("Client recognized mouse clicked down.");
           fireInterval = setInterval(expandCircle, fireRate);
@@ -78,17 +74,6 @@
             'left': data.serverXPos + 'px'
           });
        });
-
-        // socket.on('clientClick', function(data) {
-        //   console.log("Received click data from server.");
-        //   myShapeNum = data.numShapes;
-        //   $('#box').append($('<img id = "circle_' + data.numShapes + '" src = " ' + data.URL + ' "/>'));
-        //   $('#circle_' + data.numShapes).css({
-        //       'position': 'absolute',
-        //       'left': data.x + 'px',
-        //       'top': data.y + 'px'
-        //   });
-        // });
 
       });
     </script>
