@@ -19,39 +19,76 @@
     <script>
       $(function () {
         var socket = io();
-        var myShapeNum = 0;
+        var clientShapeID = 0; // 0 represents a shape has yet to be allocated an id
+        var clientShapeRadius = 0; // 0 represent  that a client has no shape associated with it
+        var clientShapeXPos = 0;
+        var clientShapeYPos = 0;
         var screenWidth = $(document).width();
         var screenHeight = $(document).height();
 
-        $(document).on('click', function(event) {
-          console.log("Client click recognized.");
-          socket.emit('clientClick', {screenWidth: screenWidth, screenHeight: screenHeight});
-        });
-        // $('form').submit(function(){
-        //   socket.emit('chat message', $('#m').val());
-        //   $('#m').val('');
-        //   return false;
-        // });
-        // socket.on('chat message', function(msg){
-        //   $('#messages').append($('<li>').text(msg));
-        // });
-        socket.on('clientClick', function(data) {
-          console.log("Received click data from server.");
-          myShapeNum = data.numShapes;
-          $('#box').append($('<img id = "circle_' + data.numShapes + '" src = " ' + data.URL + ' "/>'));
-          $('#circle_' + data.numShapes).css({
-              'position': 'absolute',
-              'left': data.x + 'px',
-              'top': data.y + 'px'
+        //  set up function to expand a circle on screen
+        function expandCircle() {
+          socket.emit("mouseDown", {
+            screenWidth: screenWidth,
+            screenHeight: screenHeight,
+            clientShapeID: clientShapeID,
+            clientShapeRadius: clientShapeRadius,
+            clientShapeXPos: clientShapeXPos ,
+            clientShapeYPos: clientShapeYPos
           });
+        }
+
+        // set up function to repeat expandCircle() at seperate intervals
+        var fireRate = 50; // ms
+        var fireInterval = null;
+
+        // $(document).on('click', function(event) {
+        //   console.log("Client click recognized.");
+        //   socket.emit('clientClick', {screenWidth: screenWidth, screenHeight: screenHeight});
+        // })
+        $(document).on('mousedown', function(event) {
+          console.log("Client recognized mouse clicked down.");
+          fireInterval = setInterval(expandCircle, fireRate);
+        });
+        $(document).on('mouseup', function(event) {
+          console.log("Client recognized mouse released.");
+          clearInterval(fireInterval);
+          clientShapeID = 0;
+          clientShapeRadius = 0;
+          clientShapeXPos = 0;
+          clientShapeYPos = 0;
         });
 
-      $('#circle_' + data.numShapes).on('mousedown', function(event) {
-        console.log("Mouse down recognized.");
-      });
-      $(document).on('mouseup', function(event){
-        console.log("Mouse is up");
-      });
+       socket.on('mouseDown', function(data) {
+          console.log("Received data from server for pushing mouse down.");
+          clientShapeID = data.serverShapeID;
+          clientShapeRadius = data.serverShapeRadius;
+          clientShapeXPos = data.serverXPos;
+          clientShapeYPos = data.serverYPos;
+          if ($('#circle_' + clientShapeID).length > 0) {
+            $('#circle_' + clientShapeID).attr('src', data.serverShapeURL);
+            console.log("src updated");
+          } else {
+            $('#box').append('<img id = "circle_' + clientShapeID + '" src = "' + data.serverShapeURL + '"/> ');
+            console.log("new src added");
+          }
+          $('#circle_' + clientShapeID).css({
+            'position': 'absolute',
+            'top': data.serverYPos + 'px',
+            'left': data.serverXPos + 'px'
+          });
+       });
+
+        // socket.on('clientClick', function(data) {
+        //   console.log("Received click data from server.");
+        //   myShapeNum = data.numShapes;
+        //   $('#box').append($('<img id = "circle_' + data.numShapes + '" src = " ' + data.URL + ' "/>'));
+        //   $('#circle_' + data.numShapes).css({
+        //       'position': 'absolute',
+        //       'left': data.x + 'px',
+        //       'top': data.y + 'px'
+        //   });
+        // });
 
       });
     </script>
