@@ -23,6 +23,9 @@
         var clientShapeRadius = 0; // 0 represent  that a client has no shape associated with it
         var clientShapeXPos = 0;
         var clientShapeYPos = 0;
+        var clientShapeColor = null;
+        var clientShapeURL = null;
+        var userID = null;
         var screenWidth = $(document).width();
         var screenHeight = $(document).height();
 
@@ -33,26 +36,35 @@
             screenHeight: screenHeight,
             clientShapeID: clientShapeID,
             clientShapeRadius: clientShapeRadius,
-            clientShapeXPos: clientShapeXPos ,
-            clientShapeYPos: clientShapeYPos
+            clientShapeXPos: clientShapeXPos,
+            clientShapeYPos: clientShapeYPos,
+            clientShapeColor: clientShapeColor,
+            clientUserID: userID
           });
         }
 
         // set up function to repeat expandCircle() at seperate intervals
-        var fireRate = 50; // ms
+        var fireRate = 75; // ms
         var fireInterval = null;
 
         $(document).on('mousedown', function(event) {
           console.log("Client recognized mouse clicked down.");
+          clientShapeXPos = event.clientX;
+          clientShapeYPos = event.clientY;
           fireInterval = setInterval(expandCircle, fireRate);
         });
         $(document).on('mouseup', function(event) {
           console.log("Client recognized mouse released.");
+          socket.emit('updateCirclesArray', {
+          	clientShapeURL: clientShapeURL,
+          	clientShapeXPos: clientShapeXPos,
+          	clientShapeYPos: clientShapeYPos,
+          	clientShapeID: clientShapeID
+          });
           clearInterval(fireInterval);
           clientShapeID = 0;
           clientShapeRadius = 0;
-          clientShapeXPos = 0;
-          clientShapeYPos = 0;
+          clientShapeColor = null;
         });
 
        socket.on('mouseDown', function(data) {
@@ -61,6 +73,10 @@
           clientShapeRadius = data.serverShapeRadius;
           clientShapeXPos = data.serverXPos;
           clientShapeYPos = data.serverYPos;
+          clientShapeColor = data.serverShapeColor;
+          userID = data.serverUserID;
+          clientShapeURL = data.serverShapeURL;
+          console.log(userID);
           if ($('#circle_' + clientShapeID).length > 0) {
             $('#circle_' + clientShapeID).attr('src', data.serverShapeURL);
             console.log("src updated");
@@ -73,6 +89,23 @@
             'top': data.serverYPos + 'px',
             'left': data.serverXPos + 'px'
           });
+       });
+
+       socket.on('sendShapes', function(data) {
+       	console.log('updating screen');
+       	for (var i = 0; i < data.length; i++) {
+       	       var x = data[i].x;
+       	       var y = data[i].y;
+       	       var URL = data[i].URL;
+       	       var ID = data[i].ID;
+	       $('#box').append('<img id = "circle_' + ID + '" src = "' + URL + '"/> ');
+	       $('#circle_' + ID).css({
+	            'position': 'absolute',
+	            'top': y + 'px',
+	            'left': x + 'px'
+	       });
+       	}
+       	console.log("Screen Updated");
        });
 
       });
